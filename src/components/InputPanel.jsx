@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Mic, Plus, Send, Image, FileText } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Send } from 'lucide-react';
 
 export default function InputPanel({ query, setQuery, loading, handleSubmit }) {
-  const [focused, setFocused] = useState(false);
+  const inputRef = useRef(null);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -11,46 +11,53 @@ export default function InputPanel({ query, setQuery, loading, handleSubmit }) {
     }
   };
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
-    <div className="flex items-end gap-3 bg-[#40414f] px-4 py-3 rounded-xl border border-gray-600">
-      {/* Left side tools */}
-      <div className="flex items-center gap-2 text-gray-400">
-        <button title="Add" className="hover:text-white">
-          <Plus size={18} />
-        </button>
-        <button title="Upload Image" className="hover:text-white">
-          <Image size={18} />
-        </button>
-        <button title="Upload File" className="hover:text-white">
-          <FileText size={18} />
-        </button>
-      </div>
-
-      {/* Text input */}
-      <textarea
-        rows={1}
-        value={query}
-        disabled={loading}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        placeholder="Message Lexi..."
-        className="flex-1 resize-none bg-transparent outline-none text-white placeholder-gray-400 text-sm"
-      ></textarea>
-
-      {/* Right icons */}
-      <div className="flex items-center gap-2">
-        <button title="Voice" className="text-gray-400 hover:text-white">
-          <Mic size={18} />
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={loading || !query.trim()}
-          className="text-gray-400 hover:text-white"
+    <div className="absolute bottom-0 left-0 w-full bg-white/90 backdrop-blur-sm border-t border-gray-200 shadow-lg py-4">
+      <div className="m-auto max-w-4xl">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          className="flex items-center gap-3 px-4"
         >
-          <Send size={18} />
-        </button>
+          {/* Text input */}
+          <div className="flex-1 relative">
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              disabled={loading}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Enter your legal question here..."
+              className="w-full py-3 px-4 bg-gray-100 rounded-full text-gray-800 placeholder-gray-500 outline-none focus:ring-2 focus:ring-gray-300 text-base"
+            />
+          </div>
+
+          {/* Submit button */}
+          <button
+            type="submit"
+            disabled={loading || !query.trim()}
+            className={`p-2 rounded-full ${
+              loading || !query.trim()
+                ? 'bg-gray-200 text-gray-400'
+                : 'bg-gray-800 text-white hover:bg-gray-700'
+            } transition-colors duration-200`}
+          >
+            {loading ? (
+              <div className="h-5 w-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Send size={20} />
+            )}
+          </button>
+        </form>
       </div>
     </div>
   );
