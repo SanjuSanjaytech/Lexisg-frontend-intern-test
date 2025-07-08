@@ -24,6 +24,17 @@ It simulates a ChatGPT-style legal assistant that allows users to ask legal ques
 
 ---
 
+## 🔗 Live Demo
+
+[Click here to view the deployed Lexi frontend assignment](https://task-management-system-n364.vercel.app/)
+
+✅ Built with React + Tailwind CSS  
+✅ Hosted on Vercel  
+✅ ChatGPT-like interface  
+✅ Citation popup with simulated PDF scroll
+
+---
+
 ## 🧪 How to Run Locally
 
 ```bash
