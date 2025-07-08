@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import InputPanel from './components/InputPanel';
-import AnswerCard from './components/AnswerCard';
+import MessageBubble from './components/MessageBubble';
 
 const mockResponse = {
   answer:
-    "Yes, under Section 166 of the Motor Vehicles Act, 1988, the claimants are entitled to an addition for future prospects even when the deceased was self-employed and aged 54–55 years at the time of the accident. In Dani Devi v. Pritam Singh, the Court held that 10% of the deceased’s annual income should be added as future prospects.",
+    "Yes, in a motor accident claim under Section 166 of the Motor Vehicles Act, 1988, where the deceased was self-employed and aged 54–55 years at the time of death, the claimant is entitled to an addition towards future prospects.",
   citations: [
     {
       text: "As the age of the deceased at the time of accident was held to be about 54–55 years by the learned Tribunal, being self-employed, as such, 10% of annual income should have been awarded on account of future prospects.",
@@ -17,31 +17,56 @@ const mockResponse = {
 export default function App() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [answer, setAnswer] = useState(null);
-  const [citations, setCitations] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const bottomRef = useRef(null);
 
   const handleSubmit = () => {
+    if (!query.trim()) return;
     setLoading(true);
-    setAnswer(null);
-    setCitations([]);
+    const userMessage = { role: 'user', text: query };
+    setMessages((prev) => [...prev, userMessage]);
+    setQuery('');
 
     setTimeout(() => {
-      setAnswer(mockResponse.answer);
-      setCitations(mockResponse.citations);
+      const assistantMessage = {
+        role: 'assistant',
+        text: mockResponse.answer,
+        citations: mockResponse.citations,
+        structured: true,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
       setLoading(false);
-    }, 2000);
+    }, 1500);
   };
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 text-center">Lexi Legal Assistant</h1>
-      <InputPanel
-        query={query}
-        setQuery={setQuery}
-        loading={loading}
-        handleSubmit={handleSubmit}
-      />
-      {answer && <AnswerCard answer={answer} citations={citations} />}
+    <div className="flex flex-col h-screen bg-[#343541]">
+      <header className="p-4 shadow-sm bg-white border-b text-gray-800 font-semibold text-center text-xl">
+        Lexi Legal Chat
+      </header>
+      <main className="flex-1 overflow-auto px-4 py-6 bg-[#f7f7f8]">
+        <div className="max-w-3xl mx-auto space-y-4">
+          {messages.map((msg, idx) => (
+            <MessageBubble key={idx} message={msg} />
+          ))}
+          {loading && <p className="text-center text-gray-500">Generating response...</p>}
+          <div ref={bottomRef} />
+        </div>
+      </main>
+      <footer className="bg-white border-t p-4">
+        <div className="max-w-3xl mx-auto">
+          <InputPanel
+            query={query}
+            setQuery={setQuery}
+            loading={loading}
+            handleSubmit={handleSubmit}
+          />
+        </div>
+      </footer>
     </div>
   );
 }
